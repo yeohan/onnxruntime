@@ -335,7 +335,7 @@ ORT_API_STATUS(OrtFillStringTensor, _Inout_ OrtValue* value, _In_ const char* co
  * \param value A tensor created from OrtCreateTensor... function.
  * \param len total data length, not including the trailing '\0' chars.
  */
-ORT_API_STATUS(OrtGetStringTensorDataLength, _Out_ const OrtValue* value, _Out_ size_t* len);
+ORT_API_STATUS(OrtGetStringTensorDataLength, _In_ const OrtValue* value, _Out_ size_t* len);
 
 /**
  * \param s string contents. Each string is NOT null-terminated.
