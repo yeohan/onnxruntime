@@ -28,9 +28,17 @@ class TestEnvironment {
   TestEnvironment(int argc, char** argv, bool create_default_logging_manager = true);
   ~TestEnvironment();
 
+  static TestEnvironment& GetInstance() {
+    return *instance_;
+  }
+#ifdef HAVE_FRAMEWORK_LIB
+  Environment& GetEnvironment() {
+    return *runtime_environment_.get();
+  }
+#endif
  private:
   ORT_DISALLOW_COPY_ASSIGNMENT_AND_MOVE(TestEnvironment);
-
+  static TestEnvironment* instance_;
 #ifdef HAVE_FRAMEWORK_LIB
   std::unique_ptr<Environment> runtime_environment_;
 #endif

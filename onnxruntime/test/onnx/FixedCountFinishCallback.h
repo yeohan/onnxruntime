@@ -4,6 +4,7 @@
 #pragma once
 
 #include <core/platform/ort_mutex.h>
+#include <core/framework/ort_event.h>
 #include "sync_api.h"
 
 template <typename T>
@@ -25,11 +26,11 @@ class FixedCountFinishCallbackImpl {
   }
 
   FixedCountFinishCallbackImpl(int s) : s_(s), results_(s) {
-    ORT_ENFORCE(CreateOnnxRuntimeEvent(&finish_event_).IsOK());
+    ORT_THROW_ON_ERROR(OrtCreateEvent(&finish_event_));
   }
 
   ~FixedCountFinishCallbackImpl() {
-    if (finish_event_) OrtCloseEvent(finish_event_);
+    if (finish_event_) OrtReleaseEvent(finish_event_);
   }
 
   ::onnxruntime::common::Status fail(ORT_CALLBACK_INSTANCE pci) {
@@ -60,7 +61,7 @@ class FixedCountFinishCallbackImpl {
   }
   //this function can only be invoked once
   bool wait() {
-    ORT_ENFORCE(WaitAndCloseEvent(finish_event_).IsOK());
+    ORT_THROW_ON_ERROR(OrtWaitAndCloseEvent(finish_event_));
     {
       std::lock_guard<onnxruntime::OrtMutex> g(m_);
       finish_event_ = nullptr;

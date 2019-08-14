@@ -22,6 +22,7 @@
 #ifdef ENABLE_LANGUAGE_INTEROP_OPS
 #include "core/language_interop_ops/language_interop_ops.h"
 #endif
+#include "core/session/environment.h"
 
 namespace onnxruntime {  // forward declarations
 class GraphTransformer;
@@ -135,7 +136,12 @@ class InferenceSession {
     If nullptr, the default LoggingManager MUST have been created previously as it will be used
     for logging. This will use the default logger id in messages.
     See core/common/logging/logging.h for details, and how LoggingManager::DefaultLogger works.
+	@param thread_pool If it's NULL, the session will run as single threaded.
     */
+  explicit InferenceSession(const SessionOptions& session_options,
+                            logging::LoggingManager* logging_manager,
+                            concurrency::ThreadPool* thread_pool);
+
   explicit InferenceSession(const SessionOptions& session_options,
                             logging::LoggingManager* logging_manager = nullptr);
 
@@ -407,6 +413,10 @@ class InferenceSession {
   // The list of execution providers.
   ExecutionProviders execution_providers_;
 
+  bool own_threadpool_ = false;
+  // Threadpool for this session
+  concurrency::ThreadPool* thread_pool_;
+
  protected:
   // Immutable state for each op in the model. Shared by all executors.
   // It has a dependency on execution_providers_.
@@ -433,8 +443,6 @@ class InferenceSession {
   std::unordered_map<std::string, InputDefMetaData> input_def_map_;
   OutputDefList output_def_list_;
 
-  // Threadpool for this session
-  std::unique_ptr<onnxruntime::concurrency::ThreadPool> thread_pool_;
   // Data transfer manager.
   DataTransferManager data_transfer_mgr_;
 

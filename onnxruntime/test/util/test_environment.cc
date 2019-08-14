@@ -51,6 +51,7 @@ TestEnvironment::TestEnvironment(int argc, char** argv, bool create_default_logg
   auto status = Environment::Create(runtime_environment_);
   ORT_ENFORCE(status == Status::OK(), "Failed creating runtime environment. ", status.ErrorMessage());
 #endif
+  instance_ = this;
 }
 
 TestEnvironment::~TestEnvironment() {
@@ -66,5 +67,6 @@ TestEnvironment::~TestEnvironment() {
   s_default_logging_manager = nullptr;
 }
 
+TestEnvironment* TestEnvironment::instance_;
 }  // namespace test
 }  // namespace onnxruntime
