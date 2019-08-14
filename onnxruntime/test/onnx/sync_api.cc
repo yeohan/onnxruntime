@@ -19,7 +19,7 @@
 #include <core/common/common.h>
 #include <core/common/logging/logging.h>
 #include <core/platform/ort_mutex.h>
-#include <core/framework/ort_event.h>
+#include "onnxruntime_event.h"
 
 using onnxruntime::common::Status;
 
@@ -34,6 +34,18 @@ class OnnxRuntimeCallbackInstance {
   onnxruntime::common::Status SignalAllEvents();
 };
 
+Status WaitAndCloseEvent(ORT_EVENT finish_event) {
+  if (finish_event == nullptr)
+    return Status(onnxruntime::common::ONNXRUNTIME, onnxruntime::common::INVALID_ARGUMENT, "");
+  {
+    std::unique_lock<onnxruntime::OrtMutex> lock(finish_event->finish_event_mutex);
+    while (!finish_event->finished) {
+      finish_event->finish_event_data.wait(lock);
+    }
+  }
+  delete finish_event;
+  return Status::OK();
+}
 
 Status CreateAndSubmitThreadpoolWork(ORT_CALLBACK_FUNCTION callback, void* data, PThreadPool pool) {
   if (callback == nullptr)
@@ -69,7 +81,11 @@ Status OnnxRuntimeSetEventWhenCallbackReturns(ORT_CALLBACK_INSTANCE pci, ORT_EVE
     return Status(onnxruntime::common::ONNXRUNTIME, onnxruntime::common::INVALID_ARGUMENT, "");
 
   if (pci == nullptr) {
-    OrtSignalEvent(finish_event);
+    {
+      std::unique_lock<onnxruntime::OrtMutex> lock(finish_event->finish_event_mutex);
+      finish_event->finished = true;
+    }
+    finish_event->finish_event_data.notify_all();
     return Status::OK();
   }
     pci->AddEvent(finish_event);
@@ -82,9 +98,22 @@ void OnnxRuntimeCallbackInstance::AddEvent(ORT_EVENT event) {
 
 Status OnnxRuntimeCallbackInstance::SignalAllEvents() {
   for (ORT_EVENT finish_event : events_to_signal_) {
-    OrtSignalEvent(finish_event);
+    {
+      std::unique_lock<onnxruntime::OrtMutex> lock(finish_event->finish_event_mutex);
+      finish_event->finished = true;
+    }
+    finish_event->finish_event_data.notify_all();
   }
   return Status::OK();
 }
 
+Status CreateOnnxRuntimeEvent(ORT_EVENT* out) {
+  if (out == nullptr)
+    return Status(onnxruntime::common::ONNXRUNTIME, onnxruntime::common::INVALID_ARGUMENT, "");
+  *out = new OnnxRuntimeEvent();
+  return Status::OK();
+}
 
+void OrtCloseEvent(ORT_EVENT finish_event) {
+  delete finish_event;
+}

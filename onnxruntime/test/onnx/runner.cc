@@ -12,7 +12,6 @@
 #include <core/framework/tensorprotoutils.h>
 #include "test_allocator.h"
 #include <core/framework/path_lib.h>
-#include <core/framework/ort_event.h>
 #ifdef _WIN32
 #include <Windows.h>
 #else
@@ -207,7 +206,7 @@ Status RunTests(TestEnv& env, int p_models, int concurrent_runs, size_t repeat_c
     for (size_t i = 0; i != env.tests.size(); ++i) {
       const char* test_case_name = env.tests[i]->GetTestCaseName().c_str();
       ORT_EVENT ev;
-      ORT_THROW_ON_ERROR(OrtCreateEvent(&ev));
+      ORT_RETURN_IF_ERROR(CreateOnnxRuntimeEvent(&ev));
       try {
         RunSingleTestCase(env.tests[i], env.env, env.sf, concurrent_runs, repeat_count, tpool, nullptr, [repeat_count, &results, ev, concurrent_runs, test_case_name](std::shared_ptr<TestCaseResult> result, ORT_CALLBACK_INSTANCE pci) {
           //TODO:output this information to a xml
@@ -220,13 +219,13 @@ Status RunTests(TestEnv& env, int p_models, int concurrent_runs, size_t repeat_c
           results.push_back(result);
           return OnnxRuntimeSetEventWhenCallbackReturns(pci, ev);
         });
-        ORT_THROW_ON_ERROR(OrtWaitAndCloseEvent(ev));
+        ORT_RETURN_IF_ERROR(WaitAndCloseEvent(ev));
       } catch (std::exception& ex) {
         LOGF_DEFAULT(ERROR, "Test %s failed:%s", test_case_name, ex.what());
         std::string node_name = env.tests[i]->GetNodeName();
         results.push_back(
             std::make_shared<TestCaseResult>(env.tests[i]->GetDataCount(), EXECUTE_RESULT::WITH_EXCEPTION, node_name));
-        OrtReleaseEvent(ev);
+        OrtCloseEvent(ev);
       }
     }
   }
