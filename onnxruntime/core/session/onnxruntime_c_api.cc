@@ -372,7 +372,7 @@ OrtStatus* CreateSessionImpl(_In_ const OrtEnv* env, _In_ const OrtSessionOption
     //reuse the thread pool from env
     sess = std::make_unique<::onnxruntime::InferenceSession>(
         options == nullptr ? onnxruntime::SessionOptions() : options->value, env->loggingManager,
-        env->value->GetDefaultThreadPool());
+        env->value->GetThreadPool());
   } else if (options->value.session_thread_pool_size == 1) {
     //single threaded
     sess = std::make_unique<::onnxruntime::InferenceSession>(options->value, env->loggingManager, nullptr);

@@ -32,7 +32,7 @@ class Environment {
      Returns whether any runtime environment instance has been initialized.
   */
   static bool IsInitialized() { return is_initialized_; }
-  concurrency::ThreadPool* GetDefaultThreadPool() {
+  concurrency::ThreadPool* GetThreadPool() {
     std::call_once(tp_once_, [this]() {
       tp_ = new concurrency::ThreadPool("default", std::max<int>(std::thread::hardware_concurrency() - 1, 1));
     });
