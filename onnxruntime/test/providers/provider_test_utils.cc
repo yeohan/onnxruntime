@@ -503,7 +503,7 @@ void OpTester::Run(ExpectResult expect_result,
 
     if (execution_providers) {
       InferenceSession session_object(so, nullptr,
-                                      so.session_thread_pool_size == 1 ? nullptr : TestEnvironment::GetInstance().GetEnvironment().GetDefaultThreadPool());
+                                      so.session_thread_pool_size == 1 ? nullptr : TestEnvironment::GetInstance().GetEnvironment().GetThreadPool());
 
       ASSERT_TRUE(!execution_providers->empty()) << "Empty execution providers vector.";
       std::string provider_types;
@@ -520,7 +520,7 @@ void OpTester::Run(ExpectResult expect_result,
         if (excluded_provider_types.count(provider_type) > 0)
           continue;
 
-        InferenceSession session_object(so, nullptr, so.session_thread_pool_size == 1 ? nullptr : TestEnvironment::GetInstance().GetEnvironment().GetDefaultThreadPool());
+        InferenceSession session_object(so, nullptr, so.session_thread_pool_size == 1 ? nullptr : TestEnvironment::GetInstance().GetEnvironment().GetThreadPool());
 
         for (auto& custom_session_registry : custom_session_registries_)
           session_object.RegisterCustomRegistry(custom_session_registry);
