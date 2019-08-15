@@ -478,7 +478,8 @@ set(onnx_test_runner_common_srcs
   ${onnx_test_runner_src_dir}/runner.h
   ${onnx_test_runner_src_dir}/runner.cc
   ${onnx_test_runner_src_dir}/TestCase.cc
-  ${onnx_test_runner_src_dir}/TestCase.h  
+  ${onnx_test_runner_src_dir}/TestCase.h
+  ${onnx_test_runner_src_dir}/onnxruntime_event.h
   ${onnx_test_runner_src_dir}/sync_api.h
   ${onnx_test_runner_src_dir}/sync_api.cc
   ${onnx_test_runner_src_dir}/callback.h

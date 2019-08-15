@@ -183,6 +183,9 @@ ORT_API_STATUS(OrtCreateEnvWithCustomLogger, OrtLoggingFunction logging_function
                _In_ const char* logid,
                _Outptr_ OrtEnv** out);
 
+//Don't call OrtReleaseEnv from Dllmain
+
+
 // TODO: document the path separator convention? '/' vs '\'
 // TODO: should specify the access characteristics of model_path. Is this read only during the
 // execution of OrtCreateSession, or does the OrtSession retain a handle to the file/directory
@@ -190,6 +193,8 @@ ORT_API_STATUS(OrtCreateEnvWithCustomLogger, OrtLoggingFunction logging_function
 //  What sort of access is needed to model_path : read or read/write?
 ORT_API_STATUS(OrtCreateSession, _In_ const OrtEnv* env, _In_ const ORTCHAR_T* model_path,
                _In_ const OrtSessionOptions* options, _Outptr_ OrtSession** out);
+
+//Don't call OrtReleaseSession from Dllmain
 
 ORT_API_STATUS(OrtCreateSessionFromArray, _In_ const OrtEnv* env, _In_ const void* model_data, size_t model_data_length,
                _In_ const OrtSessionOptions* options, _Outptr_ OrtSession** out);
