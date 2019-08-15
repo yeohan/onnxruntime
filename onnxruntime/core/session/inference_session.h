@@ -138,9 +138,9 @@ class InferenceSession {
     See core/common/logging/logging.h for details, and how LoggingManager::DefaultLogger works.
 	@param thread_pool If it's NULL, the session will run as single threaded.
     */
-  explicit InferenceSession(const SessionOptions& session_options,
-                            logging::LoggingManager* logging_manager,
-                            concurrency::ThreadPool* thread_pool);
+  InferenceSession(const SessionOptions& session_options,
+                   logging::LoggingManager* logging_manager,
+                   concurrency::ThreadPool* thread_pool);
 
   explicit InferenceSession(const SessionOptions& session_options,
                             logging::LoggingManager* logging_manager = nullptr);
