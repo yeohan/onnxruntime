@@ -541,28 +541,6 @@ common::Status InferenceSession::Initialize() {
     // handle any subgraphs
     ORT_RETURN_IF_ERROR(InitializeSubgraphSessions(graph, session_state_));
     is_inited_ = true;
-#ifdef ONNXRUNTIME_ENABLE_INSTRUMENT
-    std::map<std::string, size_t> node_name_to_index;
-    bool AreNamesUnique = true;
-    for (auto& n : session_state_.GetGraphViewer()->Nodes()) {
-      if (n.Name().empty() || node_name_to_index.find(n.Name()) != node_name_to_index.end()) {
-        AreNamesUnique = false;
-        break;
-      }
-    }
-    std::ostringstream oss;
-    if (AreNamesUnique) {
-      for (auto& kvp : node_name_to_index) {
-        oss << kvp.first << " " << kvp.second << "\n";
-      }
-      std::string content = oss.str();
-      // TODO: write the information out
-      TraceLoggingWrite(ort_provider,       // handle to my provider
-                        "NodeNameMapping",  // Event Name that should uniquely identify your event.
-                        TraceLoggingValue(content.c_str(), "op_name"));
-    }
-
-#endif
     LOGS(*session_logger_, INFO) << "Session successfully initialized.";
   } catch (const NotImplementedException& ex) {
     status = ORT_MAKE_STATUS(ONNXRUNTIME, NOT_IMPLEMENTED, "Exception during initialization: ", ex.what());
